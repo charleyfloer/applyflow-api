@@ -27,3 +27,5 @@ Users can manage companies, vacancies, applications, and interviews through a RE
 - pytest
 - pytest-django
 - Docker
+
+
