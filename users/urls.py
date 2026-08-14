@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView
+from .views import RegisterView, CurrentUserAPIView
 
 
 urlpatterns = [
@@ -11,4 +11,5 @@ urlpatterns = [
         TokenRefreshView.as_view(),
         name="token_refresh",
     ),
+    path("profile/", CurrentUserAPIView.as_view(), name="profile"),
 ]
