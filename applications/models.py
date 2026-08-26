@@ -3,17 +3,16 @@ from django.conf import settings
 from vacancies.models import Vacancy
 
 
-class Status(models.TextChoices):
-    SAVED = "saved", "Saved"
-    APPLIED = "applied", "Applied"
-    SCREENING = "screening", "Screening"
-    INTERVIEW = "interview", "Interview"
-    OFFER = "offer", "Offer"
-    REJECTED = "rejected", "Rejected"
-    WITHDRAWN = "withdrawn", "Withdrawn"
-
-
 class Application(models.Model):
+    class Status(models.TextChoices):
+        SAVED = "saved", "Saved"
+        APPLIED = "applied", "Applied"
+        SCREENING = "screening", "Screening"
+        INTERVIEW = "interview", "Interview"
+        OFFER = "offer", "Offer"
+        REJECTED = "rejected", "Rejected"
+        WITHDRAWN = "withdrawn", "Withdrawn"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
