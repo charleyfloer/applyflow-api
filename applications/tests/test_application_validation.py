@@ -1,9 +1,10 @@
+from datetime import date
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
 
 from applications.models import Application
-from datetime import date
 
 
 @pytest.mark.django_db
@@ -15,7 +16,7 @@ def test_duplicate_application(
 
     data = {
         "vacancy_id": application.vacancy.id,
-        "status": "applied",
+        "status": Application.Status.APPLIED,
         "source": "Indeed",
         "applied_at": date.today(),
     }
@@ -64,7 +65,7 @@ def test_create_application_without_applied_at_data(
 
     data = {
         "vacancy_id": vacancy.id,
-        "status": "applied",
+        "status": Application.Status.APPLIED,
         "source": "Indeed",
     }
 
@@ -77,3 +78,23 @@ def test_create_application_without_applied_at_data(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "applied_at" in response.data
     assert Application.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_saved_application_cannot_have_applied_at(
+    authenticated_client,
+    vacancy,
+):
+    response = authenticated_client.post(
+        reverse("application-list"),
+        {
+            "vacancy_id": vacancy.id,
+            "status": Application.Status.SAVED,
+            "applied_at": date.today(),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "applied_at" in response.data
+    assert not Application.objects.exists()

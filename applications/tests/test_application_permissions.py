@@ -14,7 +14,7 @@ def test_unauthenticated_user_cannot_create_application(
 
     data = {
         "vacancy_id": vacancy.id,
-        "status": "saved"
+        "status": Application.Status.APPLIED,
     }
 
     response = api_client.post(

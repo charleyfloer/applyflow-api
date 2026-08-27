@@ -19,6 +19,15 @@ def user():
     )
 
 @pytest.fixture
+def another_user():
+    return User.objects.create_user(
+        username="Michael",
+        email="michael@gmail.com",
+        password="Asdfr123",
+    )
+
+
+@pytest.fixture
 def api_client():
     return APIClient()
 
@@ -26,6 +35,12 @@ def api_client():
 @pytest.fixture
 def authenticated_client(api_client, user):
     api_client.force_authenticate(user=user)
+    return api_client
+
+
+@pytest.fixture
+def another_authenticated_client(api_client, another_user):
+    api_client.force_authenticate(user=another_user)
     return api_client
 
 
@@ -60,5 +75,5 @@ def application(user, vacancy):
     return Application.objects.create(
         user=user,
         vacancy=vacancy,
-        status="saved",
+        status=Application.Status.SAVED,
     )

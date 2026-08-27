@@ -1,20 +1,23 @@
+from datetime import date
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
+
 from applications.models import Application
-from datetime import date
 
 
 @pytest.mark.django_db
 def test_create_application_with_nested_vacancy_representation(
     authenticated_client,
     vacancy,
+    user,
 ):
     url = reverse("application-list")
 
     data = {
         "vacancy_id": vacancy.id,
-        "status": "applied",
+        "status": Application.Status.APPLIED,
         "source": "LinkedIn",
         "applied_at": date.today(),
     }
@@ -30,9 +33,12 @@ def test_create_application_with_nested_vacancy_representation(
 
     application = Application.objects.get(pk=response.data["id"])
 
-    assert application.status == response.data["status"]
+    assert application.user == user
     assert application.vacancy == vacancy
-
+    assert application.status == Application.Status.APPLIED
+    assert application.source == "LinkedIn"
+    assert application.applied_at == date.today()
+    
     assert response.data["vacancy"]["id"] == vacancy.id
     assert response.data["vacancy"]["title"] == vacancy.title
     assert response.data["vacancy"]["description"] == vacancy.description
@@ -67,14 +73,14 @@ def test_list_multiple_applications(
     Application.objects.create(
         user=user,
         vacancy=vacancy,
-        status="saved",
+        status=Application.Status.APPLIED,
     )
 
     Application.objects.create(
-            user=user,
-            vacancy=vacancy2,
-            status="saved",
-        )
+        user=user,
+        vacancy=vacancy2,
+        status=Application.Status.APPLIED,
+    )
 
     url = reverse("application-list")
 
@@ -85,15 +91,16 @@ def test_list_multiple_applications(
 
 
 @pytest.mark.django_db
-def test_update_application_with_new_vacancy(
+def test_update_application_without_changing_vacancy(
     authenticated_client,
     application,
-    vacancy2,
 ):
     url = reverse("application-detail", args=[application.id])
-
     data = {
-        "vacancy_id": vacancy2.id,
+        "status": Application.Status.APPLIED,
+        "source": "Indeed",
+        "notes": "Application submitted successfully",
+        "applied_at": date.today(),
     }
 
     response = authenticated_client.patch(
@@ -106,8 +113,12 @@ def test_update_application_with_new_vacancy(
 
     application.refresh_from_db()
 
-    assert application.vacancy == vacancy2
-    assert response.data["vacancy"]["id"] == vacancy2.id
+    assert application.status == Application.Status.APPLIED
+    assert application.source == "Indeed"
+    assert application.notes == "Application submitted successfully"
+    assert application.applied_at == date.today()
+
+    assert response.data["vacancy"]["id"] == application.vacancy.id
 
 
 @pytest.mark.django_db
