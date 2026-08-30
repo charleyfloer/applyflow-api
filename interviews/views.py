@@ -24,9 +24,8 @@ class InterviewViewSet(ModelViewSet):
 
     def get_serializer(self, *args, **kwargs):
         serializer = super().get_serializer(*args, **kwargs)
-        serializer.fields["application_id"].queryset = (
+        interview_serializer = getattr(serializer, "child", serializer)
+        interview_serializer.fields["application_id"].queryset = (
             Application.objects.filter(user=self.request.user)
         )
         return serializer
-
-
