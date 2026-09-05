@@ -32,8 +32,8 @@ def test_user_sees_only_own_interviews(
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]["id"] == interview.id
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == interview.id
 
 
 @pytest.mark.django_db

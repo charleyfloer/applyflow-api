@@ -81,7 +81,7 @@ def test_list_multiple_interviews(
     response = authenticated_client.get(reverse("interview-list"))
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 2
+    assert len(response.data["results"]) == 2
 
 
 @pytest.mark.django_db

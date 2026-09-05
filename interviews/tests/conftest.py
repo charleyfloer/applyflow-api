@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from datetime import timedelta
 from rest_framework.test import APIClient
 
 from companies.models import Company
@@ -82,6 +83,15 @@ def application(user, vacancy):
 
 
 @pytest.fixture
+def application2(user, vacancy2):
+    return Application.objects.create(
+        user=user,
+        vacancy=vacancy2,
+        status=Application.Status.APPLIED,
+    )
+
+
+@pytest.fixture
 def another_application(another_user, vacancy2):
     return Application.objects.create(
         user=another_user,
@@ -108,3 +118,39 @@ def another_interview(another_application):
         scheduled_at=timezone.now(),
         result=Interview.Result.PENDING,
     )
+
+
+@pytest.fixture
+def multiple_interviews(application, application2):
+    now = timezone.now()
+
+    return [
+        Interview.objects.create(
+            application=application,
+            type=Interview.Type.HR,
+            scheduled_at=now - timedelta(days=7),
+            result=Interview.Result.PASSED,
+            notes="HR interview completed",
+        ),
+        Interview.objects.create(
+            application=application,
+            type=Interview.Type.TECHNICAL,
+            scheduled_at=now - timedelta(days=3),
+            result=Interview.Result.PASSED,
+            notes="Django technical interview completed",
+        ),
+        Interview.objects.create(
+            application=application,
+            type=Interview.Type.FINAL,
+            scheduled_at=now + timedelta(days=1),
+            result=Interview.Result.PENDING,
+            notes="Need to prepare for final interview",
+        ),
+        Interview.objects.create(
+            application=application2,
+            type=Interview.Type.TECHNICAL,
+            scheduled_at=now - timedelta(days=4),
+            result=Interview.Result.FAILED,
+            notes="Technical interview failed",
+        ),
+    ]

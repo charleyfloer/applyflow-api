@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from datetime import date
 
 from companies.models import Company
 from vacancies.models import Vacancy
@@ -71,9 +72,56 @@ def vacancy2(company):
 
 
 @pytest.fixture
+def vacancy3(company):
+    return Vacancy.objects.create(
+        company=company,
+        title="Java Developer",
+        description="Java development",
+    )
+
+
+@pytest.fixture
+def vacancy4(company):
+    return Vacancy.objects.create(
+        company=company,
+        title="Product Manager",
+        description="Product Management",
+    )
+
+
+@pytest.fixture
 def application(user, vacancy):
     return Application.objects.create(
         user=user,
         vacancy=vacancy,
         status=Application.Status.SAVED,
     )
+
+@pytest.fixture
+def multiple_applications(user, vacancy, vacancy2, vacancy3, vacancy4):
+    return [
+        Application.objects.create(
+            user=user,
+            vacancy=vacancy,
+            status=Application.Status.APPLIED,
+            applied_at=date(2026, 8, 5)
+        ),
+        Application.objects.create(
+            user=user,
+            vacancy=vacancy2,
+            status=Application.Status.APPLIED,
+            applied_at=date(2026, 7, 26)
+        ),
+        Application.objects.create(
+            user=user,
+            vacancy=vacancy3,
+            status=Application.Status.INTERVIEW,
+            applied_at=date(2026, 8, 30)
+        ),
+        Application.objects.create(
+            user=user,
+            vacancy=vacancy4,
+            status=Application.Status.APPLIED,
+            applied_at=date(2026, 7, 20)
+        ),    
+    ]

@@ -32,3 +32,29 @@ def company():
         website="https://google.com",
         location="Mountain View, CA",
     )
+
+
+@pytest.fixture
+def multiple_companies():
+    return [
+        Company.objects.create(
+            name="Google",
+            website="https://google.com",
+            location="California",
+        ),
+        Company.objects.create(
+            name="Microsoft",
+            website="https://microsoft.com",
+            location="Washington",
+        ),
+        Company.objects.create(
+            name="Apple",
+            website="https://apple.com",
+            location="California",
+        ),
+        Company.objects.create(
+            name="Amazon",
+            website="https://amazon.com",
+            location="Washington",
+        ),
+    ]

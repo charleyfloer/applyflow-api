@@ -11,11 +11,11 @@ def test_company_list(authenticated_client, company):
     response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]["id"] == company.id
-    assert response.data[0]["name"] == "Google"
-    assert response.data[0]["website"] == "https://google.com"
-    assert response.data[0]["location"] == "Mountain View, CA"
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == company.id
+    assert response.data["results"][0]["name"] == "Google"
+    assert response.data["results"][0]["website"] == "https://google.com"
+    assert response.data["results"][0]["location"] == "Mountain View, CA"
 
 
 @pytest.mark.django_db
