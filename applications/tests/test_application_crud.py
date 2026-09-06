@@ -66,28 +66,14 @@ def test_retrieve_application_with_nested_vacancy(
 @pytest.mark.django_db
 def test_list_multiple_applications(
     authenticated_client,
-    user,
-    vacancy,
-    vacancy2,
+    multiple_applications,
 ):
-    Application.objects.create(
-        user=user,
-        vacancy=vacancy,
-        status=Application.Status.APPLIED,
-    )
-
-    Application.objects.create(
-        user=user,
-        vacancy=vacancy2,
-        status=Application.Status.APPLIED,
-    )
-
     url = reverse("application-list")
 
     response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 2
+    assert len(response.data["results"]) == 2
 
 
 @pytest.mark.django_db

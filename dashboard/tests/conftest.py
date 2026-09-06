@@ -90,9 +90,9 @@ def vacancy4(company):
 
 
 @pytest.fixture
-def application(user, vacancy):
+def application(another_user, vacancy):
     return Application.objects.create(
-        user=user,
+        user=another_user,
         vacancy=vacancy,
         status=Application.Status.SAVED,
     )
@@ -104,24 +104,20 @@ def multiple_applications(user, vacancy, vacancy2, vacancy3, vacancy4):
             user=user,
             vacancy=vacancy,
             status=Application.Status.APPLIED,
-            applied_at=date(2026, 8, 5)
         ),
         Application.objects.create(
             user=user,
             vacancy=vacancy2,
             status=Application.Status.APPLIED,
-            applied_at=date(2026, 7, 26)
         ),
         Application.objects.create(
             user=user,
             vacancy=vacancy3,
             status=Application.Status.INTERVIEW,
-            applied_at=date(2026, 8, 30)
         ),
         Application.objects.create(
             user=user,
             vacancy=vacancy4,
             status=Application.Status.APPLIED,
-            applied_at=date(2026, 7, 20)
         ),    
     ]

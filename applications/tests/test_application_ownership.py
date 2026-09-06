@@ -34,7 +34,7 @@ def test_user_cannot_see_another_users_application_in_list(
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.data == []
+    assert response.data["results"] == []
 
 
 @pytest.mark.django_db

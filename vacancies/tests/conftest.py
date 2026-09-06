@@ -60,3 +60,44 @@ def vacancy(company):
     )
 
 
+@pytest.fixture
+def multiple_vacancies(company, another_company):
+    return [
+        Vacancy.objects.create(
+            company=company,
+            title="Junior Python Developer",
+            description="Development of backend services with Django",
+            location="Remote",
+            employment_type=EmploymentType.FULL_TIME,
+            salary_min="70000.00",
+            salary_max="100000.00",
+        ),
+        Vacancy.objects.create(
+            company=company,
+            title="Senior Python Developer",
+            description="Designing scalable backend systems",
+            location="New York",
+            employment_type=EmploymentType.FULL_TIME,
+            salary_min="130000.00",
+            salary_max="180000.00",
+        ),
+        Vacancy.objects.create(
+            company=another_company,
+            title="Frontend Developer",
+            description="Development of React user interfaces",
+            location="Remote",
+            employment_type=EmploymentType.FULL_TIME,
+            salary_min="90000.00",
+            salary_max="140000.00",
+        ),
+        Vacancy.objects.create(
+            company=another_company,
+            title="QA Engineer",
+            description="Manual and automated software testing",
+            location="Redmond",
+            employment_type=EmploymentType.PART_TIME,
+            salary_min="50000.00",
+            salary_max="80000.00",
+        ),
+    ]
+
