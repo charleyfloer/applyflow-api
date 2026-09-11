@@ -6,12 +6,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 
 from .models import Vacancy
+from .schema import vacancy_schema
 from .serializers import VacancySerializer
 
 
 logger = logging.getLogger(__name__)
 
 
+@vacancy_schema
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.select_related("company")
     serializer_class = VacancySerializer

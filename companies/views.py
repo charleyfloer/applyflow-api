@@ -6,12 +6,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 
 from .models import Company
+from .schema import company_schema
 from .serializers import CompanySerializer
 
 
 logger = logging.getLogger(__name__)
 
 
+@company_schema
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer

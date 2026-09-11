@@ -6,12 +6,14 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 
 from applications.models import Application
 from .models import Interview
+from .schema import interview_schema
 from .serializers import InterviewSerializer
 
 
 logger = logging.getLogger(__name__)
 
 
+@interview_schema
 class InterviewViewSet(ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = [IsAuthenticated]
@@ -26,6 +28,9 @@ class InterviewViewSet(ModelViewSet):
     ordering = ["scheduled_at", "id"]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Interview.objects.none()
+
         return (
             Interview.objects
             .filter(application__user=self.request.user)
@@ -40,7 +45,9 @@ class InterviewViewSet(ModelViewSet):
         serializer = super().get_serializer(*args, **kwargs)
         interview_serializer = getattr(serializer, "child", serializer)
         interview_serializer.fields["application_id"].queryset = (
-            Application.objects.filter(user=self.request.user)
+            Application.objects.none()
+            if getattr(self, "swagger_fake_view", False)
+            else Application.objects.filter(user=self.request.user)
         )
         return serializer
 

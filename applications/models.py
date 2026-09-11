@@ -29,14 +29,6 @@ class Application(models.Model):
         default=Status.SAVED,
     )
     source = models.CharField(max_length=100, blank=True)
-    resume = models.FileField(
-        upload_to="resumes/",
-        blank=True,
-    )
-    cover_letter = models.FileField(
-        upload_to="cover_letters/",
-        blank=True,
-    )
     notes = models.TextField(blank=True)
     applied_at = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -5,12 +5,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 from applications.models import Application
+from applications.schema import application_schema
 from applications.serializers import ApplicationSerializer
 
 
 logger = logging.getLogger(__name__)
 
 
+@application_schema
 class ApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
@@ -21,6 +23,9 @@ class ApplicationViewSet(ModelViewSet):
     ordering = ["-created_at", "-id"]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Application.objects.none()
+
         return (
             Application.objects
             .filter(user=self.request.user)

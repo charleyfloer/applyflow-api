@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
+    'drf_spectacular',
     'users',
     'companies',
     'vacancies',
@@ -182,6 +183,13 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 2,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ApplyFlow API",
+    "DESCRIPTION": "API for managing companies, job vacancies, applications and interviews.",
+    "VERSION": "1.0.0",
 }
 
 from datetime import timedelta
