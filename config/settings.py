@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
+    'drf_spectacular',
     'users',
     'companies',
     'vacancies',
@@ -132,6 +133,37 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name}: {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -151,6 +183,13 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 2,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ApplyFlow API",
+    "DESCRIPTION": "API for managing companies, job vacancies, applications and interviews.",
+    "VERSION": "1.0.0",
 }
 
 from datetime import timedelta

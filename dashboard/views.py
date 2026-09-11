@@ -5,10 +5,13 @@ from rest_framework.views import APIView
 
 from applications.models import Application
 
+from .schema import dashboard_schema
+
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @dashboard_schema
     def get(self, request):
         applications = Application.objects.filter(user=request.user)
 

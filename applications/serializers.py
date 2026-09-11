@@ -1,8 +1,13 @@
+import logging
+
 from rest_framework import serializers
 
 from applications.models import Application
 from vacancies.models import Vacancy
 from vacancies.serializers import VacancySerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -23,8 +28,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "vacancy_id",
             "status",
             "source",
-            "resume",
-            "cover_letter",
             "notes",
             "applied_at",
             "created_at",
@@ -62,6 +65,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
             queryset = queryset.exclude(pk=self.instance.pk)
 
         if queryset.exists():
+            logger.warning(
+                "Duplicate application attempt: user_id=%s vacancy_id=%s",
+                user.pk,
+                vacancy.pk,
+            )
             raise serializers.ValidationError({
                 "vacancy_id": (
                     "You already have an application for this vacancy."
