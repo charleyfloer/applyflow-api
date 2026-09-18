@@ -21,7 +21,14 @@ validation_error = OpenApiResponse(
     response=VALIDATION_ERROR_SCHEMA,
     description="Validation errors grouped by field name.",
 )
-
+permission_error = OpenApiResponse(
+    response=ErrorSerializer,
+    description="Only staff users can modify companies.",
+)
+conflict_error = OpenApiResponse(
+    response=ErrorSerializer,
+    description="Company cannot be deleted because vacancies exist.",
+)
 
 company_schema = extend_schema_view(
     list=extend_schema(
@@ -45,6 +52,7 @@ company_schema = extend_schema_view(
             201: CompanySerializer,
             400: validation_error,
             401: authentication_error,
+            403: permission_error,
         },
     ),
     retrieve=extend_schema(
@@ -59,6 +67,7 @@ company_schema = extend_schema_view(
             200: CompanySerializer,
             400: validation_error,
             401: authentication_error,
+            403: permission_error,
             404: not_found_error,
         },
     ),
@@ -67,10 +76,17 @@ company_schema = extend_schema_view(
             200: CompanySerializer,
             400: validation_error,
             401: authentication_error,
+            403: permission_error,
             404: not_found_error,
         },
     ),
     destroy=extend_schema(
-        responses={204: None, 401: authentication_error, 404: not_found_error},
+        responses={
+            204: None,
+            401: authentication_error,
+            403: permission_error,
+            404: not_found_error,
+            409: conflict_error,
+        },
     ),
 )

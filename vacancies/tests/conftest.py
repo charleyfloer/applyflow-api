@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 
 from companies.models import Company
 from vacancies.models import EmploymentType, Vacancy
+from applications.models import Application
 
 
 User = get_user_model()
@@ -15,6 +16,7 @@ def user():
         username="Jack",
         email="jack_smith@yahoo.com",
         password="Johnson767",
+        is_staff=True,
     )
 
 @pytest.fixture
@@ -24,6 +26,18 @@ def api_client():
 
 @pytest.fixture
 def authenticated_client(api_client, user):
+    api_client.force_authenticate(user=user)
+    return api_client
+
+
+@pytest.fixture
+def regular_client(api_client):
+    user = User.objects.create_user(
+        username="Alex",
+        email="alex@gmail.com",
+        password="Alex123!",
+        is_staff=False,
+    )
     api_client.force_authenticate(user=user)
     return api_client
 
@@ -57,6 +71,15 @@ def vacancy(company):
         employment_type=EmploymentType.FULL_TIME,
         salary_min="100000.00",
         salary_max="150000.00",
+    )
+
+
+@pytest.fixture
+def application(user, vacancy):
+    return Application.objects.create(
+        user=user,
+        vacancy=vacancy,
+        status=Application.Status.SAVED,
     )
 
 
