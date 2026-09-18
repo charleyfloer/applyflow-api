@@ -12,7 +12,7 @@ class EmploymentType(models.TextChoices):
 class Vacancy(models.Model):
     company = models.ForeignKey(
         Company, 
-        on_delete=models.CASCADE, 
+        on_delete=models.PROTECT, 
         related_name="vacancies",
     )
     title = models.CharField(max_length=50)

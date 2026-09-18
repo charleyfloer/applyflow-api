@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 
+
 pytestmark = pytest.mark.django_db
 
 User = get_user_model()
@@ -40,6 +41,23 @@ def test_register_user_with_duplicate_email(api_client, user):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "email" in response.data
+    assert User.objects.count() == 1
+
+
+def test_register_user_with_duplicate_email_in_uppercase(api_client, user):
+    response = api_client.post(
+        reverse("register"),
+        {
+            "username": "Michael",
+            "email": "ANDREW@GMAIL.COM",
+            "password": "Thirduser123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "email" in response.data
     assert User.objects.count() == 1
 
 
@@ -55,4 +73,5 @@ def test_register_user_with_invalid_password(api_client):
     response = api_client.post(url, data, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "password" in response.data
     assert User.objects.count() == 0

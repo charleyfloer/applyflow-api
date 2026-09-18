@@ -2,10 +2,11 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 from companies.models import Company
+from vacancies.models import Vacancy
 
 
 @pytest.mark.django_db
-def test_company_list(authenticated_client, company):
+def test_staff_can_list_companies(authenticated_client, company):
     url = reverse("company-list")
 
     response = authenticated_client.get(url)
@@ -19,7 +20,7 @@ def test_company_list(authenticated_client, company):
 
 
 @pytest.mark.django_db
-def test_company_retrieve(authenticated_client, company):
+def test_staff_can_retrieve_company(authenticated_client, company):
     url = reverse("company-detail", args=[company.id])
 
     response = authenticated_client.get(url)
@@ -32,7 +33,7 @@ def test_company_retrieve(authenticated_client, company):
 
 
 @pytest.mark.django_db
-def test_company_create(authenticated_client):
+def test_staff_can_create_company(authenticated_client):
     url = reverse("company-list")
 
     data = {
@@ -58,7 +59,7 @@ def test_company_create(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_company_update(authenticated_client, company):
+def test_staff_can_update_company(authenticated_client, company):
     url = reverse("company-detail", args=[company.id])
 
     data = {
@@ -83,7 +84,7 @@ def test_company_update(authenticated_client, company):
 
 
 @pytest.mark.django_db
-def test_company_partial_update(authenticated_client, company):
+def test_staff_can_partially_update_company(authenticated_client, company):
     url = reverse("company-detail", args=[company.id])
 
     response = authenticated_client.patch(
@@ -104,10 +105,29 @@ def test_company_partial_update(authenticated_client, company):
 
 
 @pytest.mark.django_db
-def test_company_delete(authenticated_client, company):
-    url = reverse("company-detail", args=[company.id])
+def test_staff_can_delete_company(authenticated_client, company):
+    company_id = company.pk
+    url = reverse("company-detail", args=[company_id])
 
     response = authenticated_client.delete(url)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    assert not Company.objects.filter(id=company.id).exists()
+    assert not Company.objects.filter(pk=company_id).exists()
+
+
+@pytest.mark.django_db
+def test_staff_cannot_delete_company_with_vacancy(
+    authenticated_client,
+    company,
+    vacancy,
+):
+    url = reverse("company-detail", args=[company.id])
+
+    response = authenticated_client.delete(url)
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.data["detail"] == (
+        "Company cannot be deleted because vacancies exist."
+    )
+    assert Company.objects.filter(id=company.id).exists()
+    assert Vacancy.objects.filter(pk=vacancy.pk).exists()

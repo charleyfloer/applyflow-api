@@ -2,10 +2,11 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 from vacancies.models import Vacancy
+from applications.models import Application
 
 
 @pytest.mark.django_db
-def test_create_vacancy_with_nested_company_representation(
+def test_staff_can_create_vacancy_with_nested_company_representation(
     authenticated_client,
     company,
 ):
@@ -42,7 +43,7 @@ def test_create_vacancy_with_nested_company_representation(
 
 
 @pytest.mark.django_db
-def test_retrieve_vacancy_with_nested_company(
+def test_staff_can_retrieve_vacancy_with_nested_company(
     authenticated_client,
     vacancy,
 ):
@@ -61,7 +62,7 @@ def test_retrieve_vacancy_with_nested_company(
 
 
 @pytest.mark.django_db
-def test_list_multiple_vacancies(
+def test_staff_can_list_multiple_vacancies(
     authenticated_client,
     company,
 ):
@@ -86,7 +87,7 @@ def test_list_multiple_vacancies(
 
 
 @pytest.mark.django_db
-def test_update_vacancy_with_new_company(
+def test_staff_can_update_vacancy_with_new_company(
     authenticated_client,
     vacancy,
     another_company,
@@ -122,13 +123,29 @@ def test_update_vacancy_with_new_company(
 
 
 @pytest.mark.django_db
-def test_delete_vacancy(
+def test_staff_can_delete_vacancy(authenticated_client, vacancy):
+    vacancy_id = vacancy.pk
+    url = reverse("vacancy-detail", args=[vacancy_id])
+
+    response = authenticated_client.delete(url)
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not Vacancy.objects.filter(pk=vacancy_id).exists()
+
+
+@pytest.mark.django_db
+def test_staff_cannot_delete_vacancy_with_application(
     authenticated_client,
     vacancy,
+    application,
 ):
     url = reverse("vacancy-detail", args=[vacancy.id])
 
     response = authenticated_client.delete(url)
 
-    assert response.status_code == status.HTTP_204_NO_CONTENT
-    assert not Vacancy.objects.filter(id=vacancy.id).exists()
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.data["detail"] == (
+        "Vacancy cannot be deleted because applications exist."
+    )
+    assert Vacancy.objects.filter(id=vacancy.id).exists()
+    assert Application.objects.filter(pk=application.pk).exists()

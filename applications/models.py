@@ -20,7 +20,7 @@ class Application(models.Model):
     )
     vacancy = models.ForeignKey(
         Vacancy, 
-        on_delete=models.CASCADE, 
+        on_delete=models.PROTECT, 
         related_name="applications",
     )
     status = models.CharField(

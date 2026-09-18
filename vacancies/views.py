@@ -1,9 +1,12 @@
 import logging
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from config.permissions import IsStaffOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
+from django.db.models.deletion import ProtectedError
+from rest_framework import status
+from rest_framework.response import Response
 
 from .models import Vacancy
 from .schema import vacancy_schema
@@ -17,7 +20,7 @@ logger = logging.getLogger(__name__)
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.select_related("company")
     serializer_class = VacancySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ["company", "employment_type", "location"]
     search_fields = ["title", "description", "location", "company__name"]
@@ -39,12 +42,27 @@ class VacancyViewSet(ModelViewSet):
             self.request.user.pk,
         )
 
-    def perform_destroy(self, instance):
-        vacancy_id = instance.pk
-        instance.delete()
+    def destroy(self, request, *args, **kwargs):
+        vacancy = self.get_object()
+        vacancy_id = vacancy.pk
+
+        try:
+            vacancy.delete()
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Vacancy cannot be deleted "
+                        "because applications exist."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
 
         logger.info(
             "Vacancy deleted: id=%s user_id=%s",
             vacancy_id,
-            self.request.user.pk,
+            request.user.pk,
         )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
