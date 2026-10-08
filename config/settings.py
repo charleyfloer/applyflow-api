@@ -28,7 +28,17 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    value.strip()
+    for value in os.getenv("ALLOWED_HOSTS", "").split(",")
+    if value.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    value.strip()
+    for value in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if value.strip()
+]
 
 # Application definition
 
@@ -132,7 +142,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LOGGING = {
     "version": 1,
@@ -171,9 +182,11 @@ LOGGING = {
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.dummy.EmailBackend',
     },
 }
+
+SILENCED_SYSTEM_CHECKS = ["mail.E001"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -199,3 +212,8 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
