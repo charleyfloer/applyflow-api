@@ -65,6 +65,84 @@ Authorization: Bearer <access_token>
 
 ## Архитектура и технические решения
 
+### Архитектура развёртывания
+
+```mermaid
+flowchart LR
+    Client["Клиент / Swagger UI"]
+
+    subgraph Server["Сервер — Docker Compose"]
+        Nginx["Nginx"]
+        Backend["Gunicorn + Django REST Framework"]
+        DB[("PostgreSQL")]
+        Static["Статические файлы"]
+
+        Nginx -->|HTTP :8000| Backend
+        Backend -->|SQL| DB
+        Nginx -->|Чтение файлов| Static
+    end
+
+    Client -->|HTTPS :443| Nginx
+```
+
+Nginx принимает HTTPS-запросы и передаёт API-запросы в Gunicorn, который обслуживает Django-приложение. Django REST Framework проверяет аутентификацию и права доступа, валидирует данные и выполняет логику запроса. Django ORM обращается к PostgreSQL, а ответ возвращается клиенту через Nginx.
+
+Статические файлы Nginx отдаёт напрямую. Backend и PostgreSQL взаимодействуют внутри Docker-сети; их порты не опубликованы наружу в основной конфигурации Compose.
+
+### Модель данных (ER-диаграмма)
+
+```mermaid
+erDiagram
+    User ||--o{ Application : "создаёт"
+    Company ||--o{ Vacancy : "имеет"
+    Vacancy ||--o{ Application : "получает"
+    Application ||--o{ Interview : "имеет"
+
+    User {
+        bigint id PK
+        string username
+        string email UK
+    }
+
+    Company {
+        bigint id PK
+        string name
+        string website
+        string location
+    }
+
+    Vacancy {
+        bigint id PK
+        bigint company_id FK
+        string title
+        string employment_type
+        decimal salary_min
+        decimal salary_max
+    }
+
+    Application {
+        bigint id PK
+        bigint user_id FK
+        bigint vacancy_id FK
+        string status
+        date applied_at
+    }
+
+    Interview {
+        bigint id PK
+        bigint application_id FK
+        string type
+        datetime scheduled_at
+        string result
+    }
+```
+
+Показаны основные поля моделей. `PK` — первичный ключ, `FK` — внешний ключ, `UK` — уникальное поле. Связь `||--o{` означает «один ко многим»: например, у компании может быть от нуля до нескольких вакансий, а каждая вакансия относится ровно к одной компании.
+
+Пара `user_id` и `vacancy_id` в таблице откликов уникальна: пользователь может создать только один отклик на конкретную вакансию.
+
+### Django-приложения
+
 Приложения разделены по предметным областям:
 
 | Приложение | Ответственность |
